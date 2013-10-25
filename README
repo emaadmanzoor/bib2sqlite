@@ -1,0 +1,117 @@
+**************************************
+ A Rudimentary Bibtex Query Processor
+**************************************
+
+	Author: Emaad Ahmed Manzoor (2008A7PS068G)
+
+
+ Quick Start
+=============
+
+	$ make compiler
+	$ ./compiler EMOO.bib
+	$ make query
+	$ ./query "select * from bibtab;"
+
+ Generated Files
+=================
+
+	Intermediate File: out.sql
+	Generated Database: bibtex.db
+	Table Of Bibtex Entries: bibtab
+	
+ Supported Queries
+===================
+
+	The query processor is sqlite3, so 
+	all sqlite3 queries are supported.
+	
+ Limitations
+=============
+
+	- TeX macros of the form \<macro> are 
+	retained, but all internal single 
+	quotes are stripped out, including 
+	the ones of the form \'.
+	
+	- All braces are stripped out.
+	
+	- Valgrind reports:
+	
+	*definitely lost: 582,790 bytes*
+	
+	This is when run on EMOO.bib, all 
+	from "compiler.l", at the line:
+	
+	318: yylval.str = strdup(yytext);
+	
+	I'm not happy with this, I did spend 
+	hours cleaning up my pointers, but 
+	I hope it's enough for now, to get 
+	by in a relative grading scenario.
+		
+ Credits
+==========
+
+	Query processer taken from the sqlite3 
+	amalgamated source tarball.
+	
+	sqlite3 C wrapper from sqlite3.org.
+
+
+ "bibtab" Columns
+==================
+
+	bibtype      TEXT,	label        TEXT,	author       TEXT,
+	editor       TEXT,	booktitle    TEXT,	title        TEXT,
+	crossref     TEXT,	chapter      TEXT,	journal      TEXT,
+	volume       TEXT,	type         TEXT,	number       TEXT,
+	institution  TEXT,	organization TEXT,	publisher    TEXT,
+	school       TEXT,	address      TEXT,	edition      TEXT,
+	pages        TEXT,	day          TEXT,	month        TEXT,
+	year         TEXT,	CODEN        TEXT,	DOI          TEXT,
+	ISBN         TEXT,	ISBN13       TEXT,	ISSN         TEXT,
+	LCCN         TEXT,	MRclass      TEXT,	MRnumber     TEXT,
+	MRreviewer   TEXT,	bibdate      TEXT,	bibsource    TEXT,
+	note         TEXT,	series       TEXT,	URL          TEXT,
+	abstract     TEXT,	keywords     TEXT,	remark       TEXT,
+	subject      TEXT,	TOC          TEXT,	ZMnumber     TEXT
+	
+	
+  Flowchart
+=============
+
+                      +-------------------+
+ $ make compiler  --> | compiler (binary) |
+                      +-------------------+
+
+                            +---------+
+ $ ./compiler EMOO.bib  --> | out.sql |
+                            +---------+
+                            
+                        +------------------+     +-----------+
+      $ make query  --> | sqlite3 (binary) | --> | bibtex.db |
+                        +------------------+     +-----------+
+       |                  ^
+  +----+                  |
+  |                       |
+  |  +------------+     ....................
+  |  |  query.c   |     :   cat out.sql    :
+  |  +------------+     :..................:
+  |    |
+  |    |
+  |    v
+  |  +------------+     +------------------+
+  +> | sqlite3.o  | --> |  query (binary)  |
+     +------------+     +------------------+
+     
+                                       +----------------+     +---------------+
+ $ ./query "select * from bibtab"  --> | query (binary) | --> | Query Results |
+                                       +----------------+     +---------------+
+                                         ^
+                                         |
+                                         |
+                                       +----------------+
+                                       |   bibtex.db    |
+                                       +----------------+
+
